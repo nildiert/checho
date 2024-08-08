@@ -23,10 +23,10 @@ df = pd.read_excel(file_path, header=0)
 urls = df['Link Foto'].dropna().tolist()
 prices = df['Precio de venta'].dropna().astype(float).tolist()
 delivery_times = df['TIEMPO DE ENTREGA'].dropna().tolist()
-sizes = df['Talla'].dropna().astype(str).tolist()  # Convert to string
+sizes = df['Talla'].astype(str).tolist()  # Convert to string
 genders = df['Genero'].fillna('hombre').tolist()  # Fill missing values with 'hombre'
 types = df['Tipo'].fillna('').tolist()  # Fill missing values with empty string
-dates = df['fecha'].dropna().apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
+dates = df['fecha'].apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
 
 # Ensure the lists are of the same length
 min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates))

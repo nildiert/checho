@@ -1,1 +1,6 @@
-pip install beautifulsoup4 selenium pandas pyarrow Pillow requests
+beautifulsoup4
+selenium
+pandas
+pyarrow
+Pillow
+requests

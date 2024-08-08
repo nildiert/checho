@@ -2,8 +2,8 @@ from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from tqdm import tqdm
 import pandas as pd
-
 import os
+import numpy as np
 
 def draw_rounded_rectangle(draw, xy, radius, fill):
     x0, y0, x1, y1 = xy
@@ -16,7 +16,10 @@ def draw_rounded_rectangle(draw, xy, radius, fill):
 
 def parse_sizes(size_str, type_str):
     if type_str == 'talla':
-        return sorted(size_str.split())
+        talla_order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
+        sizes = size_str.split()
+        return sorted(sizes, key=lambda x: talla_order.index(x) if x in talla_order else len(talla_order))
+    
     size_list = []
     for part in size_str.split():
         if '...' in part:
@@ -38,7 +41,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         "label": ImageFont.truetype(font_path, 40),
         "delivery": ImageFont.truetype(font_path, 25),
         "sizes_label": ImageFont.truetype(font_path, 20),
-        "rect": ImageFont.truetype(font_path, 15),
+        "rect": ImageFont.truetype(font_path, 18),
         "chip": ImageFont.truetype(font_path, 18)
     }
 
@@ -87,29 +90,35 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         price_y = 14  # Top margin within the card
         card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill="#EE0701")
 
-        # Draw the sizes label 13 pixels below the price text
+        # Determine sizes label and chips
         sizes_label_y = price_y + fonts["price"].size + 13
         gender_text = genders[index].capitalize()
-        sizes_label_text = f"Tallas disponibles para {gender_text}:"
+        if sizes[index].strip() and sizes[index].lower() != 'nan':
+            sizes_label_text = f"Tallas disponibles para {gender_text}:"
+            sizes_list = parse_sizes(sizes[index], types[index])
+        else:
+            sizes_label_text = ""
+            sizes_list = []
+
         card_draw.text((price_x, sizes_label_y), sizes_label_text, font=fonts["sizes_label"], fill="black")
 
-        # Draw the chips with sizes
-        chip_x_start, chip_y_start = price_x, sizes_label_y + fonts["sizes_label"].size + 11
-        chip_size, chip_gap_x, chip_gap_y = 44, 9, 5
-        sizes_list = parse_sizes(sizes[index], types[index])
-        chip_x, chip_y = chip_x_start, chip_y_start
+        # Draw the chips with sizes only if sizes_list is not empty
+        if sizes_list:
+            chip_x_start, chip_y_start = price_x, sizes_label_y + fonts["sizes_label"].size + 11
+            chip_size, chip_gap_x, chip_gap_y = 44, 9, 5
+            chip_x, chip_y = chip_x_start, chip_y_start
 
-        for size in sizes_list:
-            chip_text = str(size)  # Directly convert size to string as it might be float or str
-            draw_rounded_rectangle(card_draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, "#D2EBFF")
-            text_bbox = card_draw.textbbox((0, 0), chip_text, font=fonts["chip"])
-            text_x = chip_x + (chip_size - (text_bbox[2] - text_bbox[0])) // 2
-            text_y = chip_y + (chip_size - (text_bbox[3] - text_bbox[1])) // 2
-            card_draw.text((text_x, text_y), chip_text, font=fonts["chip"], fill="black")
+            for size in sizes_list:
+                chip_text = str(int(size)) if isinstance(size, float) and size.is_integer() else str(size)  # Convert to int if size is an integer
+                draw_rounded_rectangle(card_draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, "#D2EBFF")
+                text_bbox = card_draw.textbbox((0, 0), chip_text, font=fonts["chip"])
+                text_x = chip_x + (chip_size - (text_bbox[2] - text_bbox[0])) // 2
+                text_y = chip_y + (chip_size - (text_bbox[3] - text_bbox[1])) // 2
+                card_draw.text((text_x, text_y), chip_text, font=fonts["chip"], fill="black")
 
-            chip_x += chip_size + chip_gap_x
-            if chip_x + chip_size > card_width:
-                chip_x, chip_y = chip_x_start, chip_y + chip_size + chip_gap_y
+                chip_x += chip_size + chip_gap_x
+                if chip_x + chip_size > card_width:
+                    chip_x, chip_y = chip_x_start, chip_y + chip_size + chip_gap_y
 
         # Draw the two rectangles with rounded corners and text inside
         rect_width, rect_height, corner_radius = 327, 41, 5
