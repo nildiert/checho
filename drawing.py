@@ -98,12 +98,12 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             if logo_image.mode != 'RGBA':
                 logo_image = logo_image.convert('RGBA')
 
-            logo_width = 43
+            logo_width = 60
             logo_ratio = logo_image.height / logo_image.width
             logo_height = int(logo_width * logo_ratio)
             logo_resized = logo_image.resize((logo_width, logo_height), Image.LANCZOS)
 
-            logo_x = 320
+            logo_x = 40
             logo_y = 60
 
             logo_mask = logo_resized.split()[3]
@@ -171,3 +171,5 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
     final_image_name = os.path.join(final_dir, f"final_image_{i//3 + 1}.png")
     final_image.save(final_image_name)
     tqdm.write(f"Final image saved as {final_image_name}")
+
+
