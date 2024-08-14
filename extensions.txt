@@ -4,3 +4,6 @@ pandas
 pyarrow
 Pillow
 requests
+tqdm
+rembg
+openpyxl

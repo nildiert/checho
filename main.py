@@ -27,9 +27,10 @@ sizes = df['Talla'].astype(str).tolist()  # Convert to string
 genders = df['Genero'].fillna('hombre').tolist()  # Fill missing values with 'hombre'
 types = df['Tipo'].fillna('').tolist()  # Fill missing values with empty string
 dates = df['fecha'].apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
+logos = df['Logo'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
 
 # Ensure the lists are of the same length
-min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates))
+min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates), len(logos))
 urls = urls[:min_length]
 prices = prices[:min_length]
 delivery_times = delivery_times[:min_length]
@@ -37,6 +38,7 @@ sizes = sizes[:min_length]
 genders = genders[:min_length]
 types = types[:min_length]
 dates = dates[:min_length]
+logos = logos[:min_length]
 
 # Create directories if they don't exist
 for dir_path in [downloaded_dir, no_background_dir, final_dir]:
@@ -69,7 +71,7 @@ if not args.skip_download:
 # Create final images
 print("Creating final images...")
 for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing images\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
-    create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, input_paths, output_paths, final_dir, font_path, card_path, template_path)
+    create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, card_path, template_path)
 
 # Open the final directory in the file explorer
 webbrowser.open('file://' + os.path.realpath(final_dir))

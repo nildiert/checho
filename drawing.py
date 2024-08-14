@@ -35,7 +35,7 @@ def parse_sizes(size_str, type_str):
                 size_list.append(part)  # Handle non-numeric sizes
     return sorted(set(size_list), key=lambda x: (isinstance(x, str), x))
 
-def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, input_paths, output_paths, final_dir, font_path, card_path, template_path):
+def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, card_path, template_path):
     fonts = {
         "price": ImageFont.truetype(font_path, 48),
         "label": ImageFont.truetype(font_path, 40),
@@ -61,7 +61,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         try:
             image = Image.open(output_paths[index])
-            image_ratio = image.width / image.height  # Calculate the image ratio here
+            image_ratio = image.width / image.height
         except FileNotFoundError:
             print(f"Image {output_paths[index]} not found, skipping.")
             continue
@@ -71,24 +71,43 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         new_height = int(new_width / image_ratio)
         resized_image = image.resize((new_width, new_height), Image.LANCZOS)
 
-        # Ensure the image height does not exceed 275 pixels
         if resized_image.height > 340:
             new_height = 340
             new_width = int(new_height * image_ratio)
             resized_image = resized_image.resize((new_width, new_height), Image.LANCZOS)
 
-        # Create a new card with the image
         card_with_image = card_image.copy()
         card_draw = ImageDraw.Draw(card_with_image)
-        image_x_offset = 60  # 60 pixels from the left
-        image_y_offset = card_height - 70 - resized_image.height  # 70 pixels from the bottom
+        image_x_offset = 60
+        image_y_offset = card_height - 70 - resized_image.height
         card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
 
-        # Draw the price text with the specified requirements
+        # Draw the price text
         price_text = f"${int(prices[index]):,}".replace(",", ".")
-        price_x = 517  # Left margin within the card
-        price_y = 14  # Top margin within the card
+        price_x = 517
+        price_y = 14
         card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill="#EE0701")
+
+        # Place the logo if available
+        logo_name = f"{logos[index]}.png"
+        logo_path = os.path.join('templates/logos', logo_name)
+        if os.path.exists(logo_path):
+            logo_image = Image.open(logo_path)
+
+            # Ensure the logo has an alpha channel (transparency)
+            if logo_image.mode != 'RGBA':
+                logo_image = logo_image.convert('RGBA')
+
+            logo_width = 43
+            logo_ratio = logo_image.height / logo_image.width
+            logo_height = int(logo_width * logo_ratio)
+            logo_resized = logo_image.resize((logo_width, logo_height), Image.LANCZOS)
+
+            logo_x = 320
+            logo_y = 60
+
+            logo_mask = logo_resized.split()[3]
+            card_with_image.paste(logo_resized, (logo_x, logo_y), logo_mask)
 
         # Determine sizes label and chips
         sizes_label_y = price_y + fonts["price"].size + 13
