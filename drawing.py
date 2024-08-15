@@ -78,8 +78,22 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         card_with_image = card_image.copy()
         card_draw = ImageDraw.Draw(card_with_image)
-        image_x_offset = 60
-        image_y_offset = card_height - 70 - resized_image.height
+
+        # Calculate the position of the image based on the type
+        if types[index].lower() == 'talla':
+            # Center the image horizontally within a 356x356 pixel gray box
+            box_width = 356
+            box_x_offset = 19  # Position of the box from the left edge of the card
+            box_y_offset = card_height - 27 - 356  # Position of the box from the bottom edge of the card
+
+            # Calculate the new position to center the image horizontally
+            image_x_offset = box_x_offset + (box_width - resized_image.width) // 2
+            image_y_offset = box_y_offset + (356 - resized_image.height) // 2
+        else:
+            # Original position if not 'talla'
+            image_x_offset = 60
+            image_y_offset = card_height - 70 - resized_image.height
+
         card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
 
         # Draw the price text
@@ -145,7 +159,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         # First rectangle
         rect1_y = card_height - 28 - rect_height
-        date_text = dates[index].strftime('%d/%m/%Y') if not pd.isnull(dates[index]) else 'Fecha no disponible'
+        date_text = dates[index].strftime('%d/%m/%Y') if not pd.isnull(dates[index]) else dates[index]
         rect1_text = f"Precios válidos hasta {'hoy' if date_text == today else 'el'} {date_text}"
         draw_rounded_rectangle(card_draw, (rect_x, rect1_y, rect_x + rect_width, rect1_y + rect_height), corner_radius, "#FD5647")
         bbox_price = card_draw.textbbox((0, 0), rect1_text, font=fonts["rect"])
@@ -171,5 +185,3 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
     final_image_name = os.path.join(final_dir, f"final_image_{i//3 + 1}.png")
     final_image.save(final_image_name)
     tqdm.write(f"Final image saved as {final_image_name}")
-
-
