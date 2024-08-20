@@ -15,7 +15,7 @@ def draw_rounded_rectangle(draw, xy, radius, fill):
     draw.pieslice([x1 - 2*radius, y1 - 2*radius, x1, y1], 0, 90, fill=fill)
 
 def parse_sizes(size_str, type_str):
-    if type_str == 'talla':
+    if type_str.lower() == 'talla':
         talla_order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
         sizes = size_str.split()
         return sorted(sizes, key=lambda x: talla_order.index(x) if x in talla_order else len(talla_order))
@@ -169,7 +169,12 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         # Second rectangle
         rect2_y = rect1_y - rect_height - 5
-        rect2_text = f"Entrega en {delivery_times[index]} días aprox."
+        if delivery_times[index] == "inmediata":
+            rect2_text = f"Entrega en {delivery_times[index]} días aprox."
+        else:
+            rect2_text = f"Entrega Inmediata."
+
+        
         draw_rounded_rectangle(card_draw, (rect_x, rect2_y, rect_x + rect_width, rect2_y + rect_height), corner_radius, "#4FAFFB")
         bbox_delivery = card_draw.textbbox((0, 0), rect2_text, font=fonts["rect"])
         text_x = rect_x + (rect_width - (bbox_delivery[2] - bbox_delivery[0])) // 2
