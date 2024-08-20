@@ -170,9 +170,9 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         # Second rectangle
         rect2_y = rect1_y - rect_height - 5
         if delivery_times[index] == "inmediata":
-            rect2_text = f"Entrega en {delivery_times[index]} días aprox."
-        else:
             rect2_text = f"Entrega Inmediata."
+        else:
+            rect2_text = f"Entrega en {delivery_times[index]} días aprox."
 
         
         draw_rounded_rectangle(card_draw, (rect_x, rect2_y, rect_x + rect_width, rect2_y + rect_height), corner_radius, "#4FAFFB")
