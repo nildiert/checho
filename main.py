@@ -68,11 +68,17 @@ if not args.skip_download:
         if download_image(url, input_paths[i], error_log_path):
             remove_background(input_paths[i], output_paths[i], error_log_path)
 
-# Create final images
 print("Creating final images...")
-for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing images\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
-    create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, card_path, template_path)
-
+for mode in ['light', 'dark']:
+    if mode == 'light':
+        current_card_path = 'templates/light_card.png'
+        current_template_path = 'templates/light_template.png'
+    else:
+        current_card_path = 'templates/dark_card.png'
+        current_template_path = 'templates/dark_template.png'
+    
+    for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing {mode} images\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
+        create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode)
 # Open the final directory in the file explorer
 webbrowser.open('file://' + os.path.realpath(final_dir))
 
