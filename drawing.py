@@ -181,7 +181,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         card_draw.text((text_x, text_y), rect1_text, font=fonts["rect"], fill="white")
 
         rect2_y = rect1_y - rect_height - 5
-        rect2_text = f"Entrega Inmediata." if delivery_times[index] == "inmediata" else f"Entrega en {delivery_times[index]} días aprox."
+        rect2_text = f"Entrega Inmediata." if delivery_times[index] == "inmediata" else f"Entrega en {int(delivery_times[index])} días aprox."
         draw_rounded_rectangle(card_draw, (rect_x, rect2_y, rect_x + rect_width, rect2_y + rect_height), corner_radius, rect_color_2)
         bbox_delivery = card_draw.textbbox((0, 0), rect2_text, font=fonts["rect"])
         text_x = rect_x + (rect_width - (bbox_delivery[2] - bbox_delivery[0])) // 2
