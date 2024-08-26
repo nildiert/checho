@@ -8,7 +8,7 @@ from datetime import datetime
 from utils import clear_directory, download_image
 from image_processing import remove_background
 from drawing import create_final_image
-from constants import base_dir, downloaded_dir, no_background_dir, final_dir, font_path, card_path, template_path
+from constants import base_dir, downloaded_dir, no_background_dir, final_dir, font_path
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Process images for promotions.')
@@ -71,14 +71,31 @@ if not args.skip_download:
 print("Creating final images...")
 for mode in ['light', 'dark']:
     if mode == 'light':
-        current_card_path = 'templates/light_card.png'
-        current_template_path = 'templates/light_template.png'
+        card_paths = {
+            'with_prices': 'templates/light_card.png',
+            'without_prices': 'templates/light_card.png'
+        }
+        template_paths = {
+            'with_prices': 'templates/light_template.png',
+            'without_prices': 'templates/without_price_light_template.png'
+        }
     else:
-        current_card_path = 'templates/dark_card.png'
-        current_template_path = 'templates/dark_template.png'
+        card_paths = {
+            'with_prices': 'templates/dark_card.png',
+            'without_prices': 'templates/dark_card.png'
+        }
+        template_paths = {
+            'with_prices': 'templates/dark_template.png',
+            'without_prices': 'templates/without_price_dark_template.png'
+        }
     
-    for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing {mode} images\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
-        create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode)
+    for with_price_key, with_price_flag in [('with_prices', True), ('without_prices', False)]:
+        current_card_path = card_paths[with_price_key]
+        current_template_path = template_paths[with_price_key]
+
+        for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing {mode} images ({with_price_key})\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
+            create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode, with_price=with_price_flag)
+
 # Open the final directory in the file explorer
 webbrowser.open('file://' + os.path.realpath(final_dir))
 

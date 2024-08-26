@@ -35,7 +35,7 @@ def parse_sizes(size_str, type_str):
                 size_list.append(part)  # Handle non-numeric sizes
     return sorted(set(size_list), key=lambda x: (isinstance(x, str), x))
 
-def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, card_path, template_path, mode):
+def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, card_path, template_path, mode, with_price=True):
     # Set colors based on the mode
     if mode == 'light':
         primary_color = "#EE0701"
@@ -69,6 +69,9 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
     final_image = template_image.copy()
     draw = ImageDraw.Draw(final_image)
+
+    price_y = 14
+    price_x = 517
 
     for j in range(3):
         index = i + j
@@ -108,11 +111,10 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
 
-        # Draw the price text
-        price_text = f"${int(prices[index]):,}".replace(",", ".")
-        price_x = 517
-        price_y = 14
-        card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill=price_color)
+        # Draw the price text only if with_price is True
+        if with_price:
+            price_text = f"${int(prices[index]):,}".replace(",", ".")
+            card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill=price_color)
 
         # Place the logo if available
         logo_name = f"{logos[index]}.png"
@@ -190,7 +192,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         card_y_position = 50 + j * (card_height + 20)
         final_image.paste(card_with_image, (card_x_position, card_y_position), card_with_image)
 
-    mode_dir = os.path.join(final_dir, mode)
+    mode_dir = os.path.join(final_dir, mode, "with_prices" if with_price else "without_prices")
     os.makedirs(mode_dir, exist_ok=True)
     final_image_name = os.path.join(mode_dir, f"final_image_{i//3 + 1}.png")
     final_image.save(final_image_name)
