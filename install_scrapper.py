@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import shutil
 
 def install_venv():
     # Check if python3-venv is installed, and install if necessary
@@ -37,6 +38,11 @@ def main():
     # Select the user
     win_user = select_windows_user()
     install_dir = f"/mnt/c/Users/{win_user}/Documents/scrapper"
+    
+    # Remove existing directory if not empty
+    if os.path.exists(install_dir) and os.listdir(install_dir):
+        print(f"Directory {install_dir} is not empty. Removing existing content.")
+        shutil.rmtree(install_dir)
     
     # Create installation directory
     os.makedirs(install_dir, exist_ok=True)
