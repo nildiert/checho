@@ -140,7 +140,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         sizes_label_y = price_y + fonts["price"].size + 13
         gender_text = genders[index].capitalize()
         if sizes[index].strip() and sizes[index].lower() != 'nan':
-            sizes_label_text = f"Tallas disponibles para {gender_text}:"
+            sizes_label_text = f"Tallas disponibles para {gender_text.upper()}:"
             sizes_list = parse_sizes(sizes[index], types[index])
         else:
             sizes_label_text = ""
