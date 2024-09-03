@@ -47,12 +47,12 @@ def main():
     # Clone the repository
     subprocess.run(['git', 'clone', 'https://github.com/nildiert/checho.git', '.'], check=True)
     
-    # Create and activate a Python virtual environment in the installation directory
+    # Create a Python virtual environment in the installation directory
     subprocess.run(['python3', '-m', 'venv', '.venv'], check=True)
-    activate_script = os.path.join(install_dir, '.venv/bin/activate')
     
-    # Install dependencies
-    subprocess.run([f"source {activate_script} && pip install --upgrade pip && pip install -r requirements.txt"], shell=True, check=True)
+    # Activate the virtual environment and install dependencies
+    activate_script = os.path.join(install_dir, '.venv/bin/activate')
+    subprocess.run([f"bash -c 'source {activate_script} && pip install --upgrade pip && pip install -r requirements.txt'"], shell=True, check=True)
     
     # Make sure the main script is executable
     subprocess.run(['chmod', '+x', 'main.py'], check=True)
