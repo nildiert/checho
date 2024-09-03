@@ -139,7 +139,11 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         # Determine sizes label and chips
         sizes_label_y = price_y + fonts["price"].size + 13
         gender_text = genders[index].capitalize()
-        if sizes[index].strip() and sizes[index].lower() != 'nan':
+
+        if types[index].lower() == 'dimensiones':
+            sizes_label_text = "Dimensiones:"
+            sizes_list = [sizes[index]]
+        elif sizes[index].strip() and sizes[index].lower() != 'nan':
             sizes_label_text = f"Tallas disponibles para {gender_text.upper()}:"
             sizes_list = parse_sizes(sizes[index], types[index])
         else:
@@ -148,7 +152,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         card_draw.text((price_x, sizes_label_y), sizes_label_text, font=fonts["sizes_label"], fill=text_color)
 
-        if sizes_list:
+        if sizes_list and types[index].lower() != 'dimensiones':
             chip_x_start, chip_y_start = price_x, sizes_label_y + fonts["sizes_label"].size + 11
             chip_size, chip_gap_x, chip_gap_y = 44, 9, 5
             chip_x, chip_y = chip_x_start, chip_y_start
@@ -166,6 +170,11 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
                 chip_x += chip_size + chip_gap_x
                 if chip_x + chip_size > card_width:
                     chip_x, chip_y = chip_x_start, chip_y + chip_size + chip_gap_y
+
+        elif types[index].lower() == 'dimensiones':
+            dimensions_text = sizes_list[0]
+            dimensions_y = sizes_label_y + fonts["sizes_label"].size + 11
+            card_draw.text((price_x, dimensions_y), dimensions_text, font=fonts["chip"], fill=text_color)
 
         # Draw rectangles with rounded corners and text inside
         rect_width, rect_height, corner_radius = 327, 41, 5
