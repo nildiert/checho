@@ -18,4 +18,4 @@ echo "$alias_command" >> ~/.bashrc
 # Apply the changes to the current terminal session
 source ~/.bashrc
 
-echo "El alias 'install_scrapper' ha sido agregado a ~/.bashrc y está listo para ser usado."
+echo "Escribe en la consola 'source ~/.bashrc' para que puedas usar el comando 'install_scrapper'"
