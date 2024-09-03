@@ -6,7 +6,18 @@ if ! dpkg -l | grep -q python3-venv; then
     sudo apt install -y python3-venv
 fi
 
-INSTALL_DIR="/mnt/c/Users/Public/Documents/scrapper"
+echo "Please select a Windows user for installation:"
+users=$(ls /mnt/c/Users)
+select WIN_USER in $users; do
+    if [ -n "$WIN_USER" ]; then
+        echo "You selected $WIN_USER"
+        break
+    else
+        echo "Invalid selection. Please try again."
+    fi
+done
+
+INSTALL_DIR="/mnt/c/Users/$WIN_USER/Documents/scrapper"
 
 mkdir -p "$INSTALL_DIR"
 
