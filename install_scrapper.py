@@ -56,4 +56,31 @@ def main():
     # Crea el directorio de instalación
     os.makedirs(install_dir, exist_ok=True)
     
-    #
+    # Navega al directorio de instalación
+    os.chdir(install_dir)
+    
+    # Clona el repositorio
+    subprocess.run(['git', 'clone', 'https://github.com/nildiert/checho.git', '.'], check=True)
+    
+    # Crea un entorno virtual en el directorio de instalación
+    subprocess.run(['python3', '-m', 'venv', '.venv'], check=True)
+    
+    # Activa el entorno virtual e instala las dependencias
+    activate_script = os.path.join(install_dir, '.venv/bin/activate')
+    subprocess.run([f"bash -c 'source {activate_script} && pip install --upgrade pip && pip install -r requirements.txt'"], shell=True, check=True)
+    
+    # Asegúrate de que el script principal sea ejecutable
+    subprocess.run(['chmod', '+x', 'main.py'], check=True)
+    
+    # Agrega los alias al archivo de configuración de bash
+    add_alias_to_bashrc("activate_scrapper", f"cd {install_dir} && source .venv/bin/activate")
+    add_alias_to_bashrc("scrapper", "python3 main.py")
+    
+    # Ejecuta source ~/.bashrc para que los aliases queden disponibles de inmediato
+    subprocess.run(["bash", "-c", "source ~/.bashrc"], shell=True)
+
+    print(f"Instalación completa. El repositorio está instalado en {install_dir}.")
+    print(f"Para activar el entorno virtual, ejecuta 'activate_scrapper'.")
+
+if __name__ == "__main__":
+    main()
