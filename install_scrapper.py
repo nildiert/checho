@@ -11,31 +11,15 @@ def install_venv():
         subprocess.run(['sudo', 'apt', 'update'], check=True)
         subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-venv'], check=True)
 
-def select_windows_user():
-    # List Windows users
-    users_dir = '/mnt/c/Users'
-    users = [user for user in os.listdir(users_dir) if os.path.isdir(os.path.join(users_dir, user)) and user != 'desktop.ini']
-
-    # Display and select user
-    print("Please select a Windows user for installation:")
-    for i, user in enumerate(users, start=1):
-        print(f"{i}) {user}")
-
-    while True:
-        try:
-            choice = int(input("Select a user by number: "))
-            if 1 <= choice <= len(users):
-                return users[choice - 1]
-            else:
-                print("Invalid selection. Please try again.")
-        except ValueError:
-            print("Please enter a valid number.")
-
 def main():
+    # Ensure the script is called with the correct arguments
+    if len(sys.argv) != 2:
+        print("Usage: python3 install_scrapper.py <Windows_Username>")
+        sys.exit(1)
+
+    win_user = sys.argv[1]
     install_venv()
     
-    # Select the user
-    win_user = select_windows_user()
     install_dir = f"/mnt/c/Users/{win_user}/Documents/scrapper"
     
     # Create installation directory
