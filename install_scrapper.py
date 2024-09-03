@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import shutil
 
 def install_venv():
     # Verifica si python3-venv está instalado, e instálalo si es necesario
@@ -77,7 +78,8 @@ def main():
     add_alias_to_bashrc("scrapper", "python3 main.py")
     
     # Ejecuta source ~/.bashrc para que los aliases queden disponibles de inmediato
-    subprocess.run(["bash", "-c", "source ~/.bashrc"], shell=True)
+    bash_command = "source ~/.bashrc"
+    subprocess.run(bash_command, shell=True, executable='/bin/bash')
 
     print(f"Instalación completa. El repositorio está instalado en {install_dir}.")
     print(f"Para activar el entorno virtual, ejecuta 'activate_scrapper'.")
