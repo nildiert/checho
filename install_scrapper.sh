@@ -1,13 +1,18 @@
 #!/bin/bash
 
-REPO_URL="https://github.com/nildiert/checho.git"
-INSTALL_DIR="$HOME/Documents/checho"
+if ! dpkg -l | grep -q python3-venv; then
+    echo "python3-venv is not installed. Installing it now..."
+    sudo apt update
+    sudo apt install -y python3-venv
+fi
+
+INSTALL_DIR="/mnt/c/Users/Public/Documents/scrapper"
 
 mkdir -p "$INSTALL_DIR"
 
 cd "$INSTALL_DIR"
 
-git clone "$REPO_URL" .
+git clone https://github.com/nildiert/checho.git .
 
 python3 -m venv .venv
 source .venv/bin/activate
