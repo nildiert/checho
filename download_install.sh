@@ -6,5 +6,16 @@ PYTHON_SCRIPT_URL="https://raw.githubusercontent.com/nildiert/checho/main/instal
 # Download the Python script to the current directory
 curl -O "$PYTHON_SCRIPT_URL"
 
-echo "The installation script has been downloaded as install_scrapper.py."
-echo "You can now run it with: python3 install_scrapper.py"
+echo "El script de instalación se ha descargado como install_scrapper.py."
+echo "Ahora puedes ejecutarlo con: python3 install_scrapper.py"
+
+# Define the alias to be added
+alias_command="alias install_scrapper='python3 $(pwd)/install_scrapper.py'"
+
+# Add the alias to ~/.bashrc
+echo "$alias_command" >> ~/.bashrc
+
+# Apply the changes to the current terminal session
+source ~/.bashrc
+
+echo "El alias 'install_scrapper' ha sido agregado a ~/.bashrc y está listo para ser usado."
