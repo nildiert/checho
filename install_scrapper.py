@@ -6,10 +6,10 @@ import shutil
 def install_venv():
     # Verifica si python3-venv está instalado e instálalo si es necesario
     try:
+        subprocess.run(['sudo', 'apt', 'update'], check=True)
         subprocess.run(['python3', '-m', 'venv', '--help'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError:
         print("python3-venv no está instalado. Instalándolo ahora...")
-        subprocess.run(['sudo', 'apt', 'update'], check=True)
         subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-venv'], check=True)
     
     # Verifica si ensurepip está disponible

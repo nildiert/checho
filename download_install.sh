@@ -10,7 +10,7 @@ echo "El script de instalación se ha descargado como install_scrapper.py."
 echo "Ahora puedes ejecutarlo con: python3 install_scrapper.py"
 
 # Define the alias to be added
-alias_command="alias install_scrapper='python3 $(pwd)/install_scrapper.py'"
+alias_command="alias install_scrapper='sudo python3 $(pwd)/install_scrapper.py'"
 
 # Add the alias to ~/.bashrc
 echo "$alias_command" >> ~/.bashrc
