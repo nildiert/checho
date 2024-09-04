@@ -4,17 +4,20 @@ import sys
 import shutil
 
 def install_venv():
-    # Verifica si python3-venv está instalado e instálalo si es necesario
-    try:
-        subprocess.run(['sudo', 'apt', 'update'], check=True)
-        subprocess.run(['python3', '-m', 'venv', '--help'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError:
-        print("python3-venv no está instalado. Instalándolo ahora...")
-        subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-venv'], check=True)
+    # Actualiza los repositorios de paquetes
+    subprocess.run(['sudo', 'apt', 'update'], check=True)
     
+    # Instala python3.10-venv directamente
+    try:
+        print("Instalando python3.10-venv...")
+        subprocess.run(['sudo', 'apt', 'install', '-y', 'python3.10-venv'], check=True)
+    except subprocess.CalledProcessError:
+        print("Error: No se pudo instalar python3.10-venv.")
+        sys.exit(1)
+
     # Verifica si ensurepip está disponible
     try:
-        subprocess.run(['python3', '-m', 'ensurepip', '--help'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(['python3.10', '-m', 'ensurepip', '--help'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError:
         print("ensurepip no está disponible. Intentando instalarlo o verificar pip...")
         
@@ -31,6 +34,7 @@ def install_venv():
         except subprocess.CalledProcessError:
             print("pip no está disponible. No se puede continuar.")
             sys.exit(1)
+
 
 def select_windows_user():
     # Lista los usuarios de Windows
