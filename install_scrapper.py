@@ -16,8 +16,21 @@ def install_venv():
     try:
         subprocess.run(['python3', '-m', 'ensurepip', '--help'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError:
-        print("ensurepip no está disponible. Instalando ensurepip ahora...")
-        subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-pip'], check=True)
+        print("ensurepip no está disponible. Intentando instalarlo o verificar pip...")
+        
+        # Prueba instalar python3-pip, pero maneja el error si no está disponible
+        try:
+            subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-pip'], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error: No se pudo instalar python3-pip. {e}")
+            print("Es posible que el paquete ya no esté disponible. Intentando continuar con pip...")
+        
+        # Verifica si pip está instalado de alguna forma
+        try:
+            subprocess.run(['pip3', '--version'], check=True)
+        except subprocess.CalledProcessError:
+            print("pip no está disponible. No se puede continuar.")
+            sys.exit(1)
 
 def select_windows_user():
     # Lista los usuarios de Windows
