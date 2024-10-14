@@ -44,6 +44,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         rect_color_1 = "#FD5647"
         rect_color_2 = "#4FAFFB"
         text_color = "black"
+        logo_folder = 'templates/logos/light'  # Select light logos
     else:  # dark mode
         primary_color = "#FF5733"
         background_color = "#1E1E1E"
@@ -51,6 +52,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         rect_color_1 = "#FF5733"
         rect_color_2 = "#3498DB"
         text_color = "white"
+        logo_folder = 'templates/logos/dark'  # Select dark logos
 
     fonts = {
         "price": ImageFont.truetype(font_path, 48),
@@ -118,7 +120,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         # Place the logo if available
         logo_name = f"{logos[index]}.png"
-        logo_path = os.path.join('templates/logos', logo_name)
+        logo_path = os.path.join(logo_folder, logo_name)  # Use the selected folder for light or dark mode logos
         if os.path.exists(logo_path):
             logo_image = Image.open(logo_path)
 
