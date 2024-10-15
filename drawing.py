@@ -161,9 +161,11 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
             for size in sizes_list:
                 chip_text = str(int(size)) if isinstance(size, float) and size.is_integer() else str(size)
-                light_color = "#D2EBFF" if mode == 'light' else "#2C3E50"
-                dark_color = "#1E232B" if mode == 'light' else "#ECF0F1"
-                draw_rounded_rectangle(card_draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, light_color)
+                if mode == 'light':
+                    chip_color = "#D2EBFF" if genders[index].lower() == 'hombre' else "#FFD2EB"
+                else:
+                    chip_color = "#2C3E50" if genders[index].lower() == 'hombre' else "#502c3e"
+                draw_rounded_rectangle(card_draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, chip_color)
                 text_bbox = card_draw.textbbox((0, 0), chip_text, font=fonts["chip"])
                 text_x = chip_x + (chip_size - (text_bbox[2] - text_bbox[0])) // 2
                 text_y = chip_y + (chip_size - (text_bbox[3] - text_bbox[1])) // 2
