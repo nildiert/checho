@@ -167,7 +167,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
                 if mode == 'light':
                     chip_color = "#D2EBFF" if genders[index].lower() == 'hombre' else "#FFD2EB"
                 else:
-                    chip_color = "#2C3E50" if genders[index].lower() == 'hombre' else "#502c3e"
+                    chip_color = "#2C3E50" if genders[index].lower() == 'hombre' else "#8B2CFF"
                 draw_rounded_rectangle(card_draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, chip_color)
                 text_bbox = card_draw.textbbox((0, 0), chip_text, font=fonts["chip"])
                 text_x = chip_x + (chip_size - (text_bbox[2] - text_bbox[0])) // 2
