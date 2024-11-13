@@ -127,7 +127,10 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             if logo_image.mode != 'RGBA':
                 logo_image = logo_image.convert('RGBA')
 
-            logo_width = 60
+            if logos[index] == "gratis":
+                logo_width = 100
+            else:
+                logo_width = 60
             logo_ratio = logo_image.height / logo_image.width
             logo_height = int(logo_width * logo_ratio)
             logo_resized = logo_image.resize((logo_width, logo_height), Image.LANCZOS)
