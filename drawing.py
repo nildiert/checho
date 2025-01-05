@@ -59,7 +59,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         "label": ImageFont.truetype(font_path, 40),
         "delivery": ImageFont.truetype(font_path, 25),
         "sizes_label": ImageFont.truetype(font_path, 20),
-        "rect": ImageFont.truetype(font_path, 18),
+        "rect": ImageFont.truetype(font_path, 24),
         "chip": ImageFont.truetype(font_path, 18)
     }
 
@@ -189,7 +189,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         rect1_y = card_height - 28 - rect_height
         date_text = dates[index].strftime('%d/%m/%Y') if not pd.isnull(dates[index]) else dates[index]
-        rect1_text = f"Precios válidos hasta {'hoy' if date_text == today else 'el'} {date_text}"
+        rect1_text = f"Válido hasta {'hoy' if date_text == today else 'el'} {date_text}"
         draw_rounded_rectangle(card_draw, (rect_x, rect1_y, rect_x + rect_width, rect1_y + rect_height), corner_radius, rect_color_1)
         bbox_price = card_draw.textbbox((0, 0), rect1_text, font=fonts["rect"])
         text_x = rect_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
