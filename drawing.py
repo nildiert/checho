@@ -114,9 +114,9 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
 
         # Draw the price text only if with_price is True
-        if with_price:
-            price_text = f"${int(prices[index]):,}".replace(",", ".")
-            card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill=price_color)
+        # if with_price:
+        price_text = f"${int(prices[index]):,}".replace(",", ".")
+        card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill=price_color)
 
         # Place the logo if available
         logo_name = f"{logos[index]}.png"
@@ -188,13 +188,17 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         rect_x = card_width - 28 - rect_width
 
         rect1_y = card_height - 28 - rect_height
-        date_text = dates[index].strftime('%d/%m/%Y') if not pd.isnull(dates[index]) else dates[index]
+        if pd.isnull(dates[index]):
+            date_text  = None
+        else:
+            date_text = dates[index].strftime('%d/%m/%Y')
         rect1_text = f"Válido hasta {'hoy' if date_text == today else 'el'} {date_text}"
-        draw_rounded_rectangle(card_draw, (rect_x, rect1_y, rect_x + rect_width, rect1_y + rect_height), corner_radius, rect_color_1)
-        bbox_price = card_draw.textbbox((0, 0), rect1_text, font=fonts["rect"])
-        text_x = rect_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
-        text_y = rect1_y + (rect_height - (bbox_price[3] - bbox_price[1])) // 2
-        card_draw.text((text_x, text_y), rect1_text, font=fonts["rect"], fill="white")
+        if not date_text == None:
+            draw_rounded_rectangle(card_draw, (rect_x, rect1_y, rect_x + rect_width, rect1_y + rect_height), corner_radius, rect_color_1)
+            bbox_price = card_draw.textbbox((0, 0), rect1_text, font=fonts["rect"])
+            text_x = rect_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
+            text_y = rect1_y + (rect_height - (bbox_price[3] - bbox_price[1])) // 2
+            card_draw.text((text_x, text_y), rect1_text, font=fonts["rect"], fill="white")
 
         rect2_y = rect1_y - rect_height - 5
         if delivery_times[index] == "inmediata":
@@ -213,7 +217,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         card_y_position = 50 + j * (card_height + 20)
         final_image.paste(card_with_image, (card_x_position, card_y_position), card_with_image)
 
-    mode_dir = os.path.join(final_dir, mode, "with_prices" if with_price else "without_prices")
+    mode_dir = os.path.join(final_dir, mode, "with_payment_data" if with_price else "without_payment_data")
     os.makedirs(mode_dir, exist_ok=True)
     final_image_name = os.path.join(mode_dir, f"final_image_{i//3 + 1}.png")
     final_image.save(final_image_name)
