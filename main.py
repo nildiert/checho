@@ -7,12 +7,13 @@ from datetime import datetime
 
 from utils import clear_directory, download_image
 from image_processing import remove_background
-from drawing import create_final_image
-from constants import base_dir, downloaded_dir, no_background_dir, final_dir, font_path
+from drawing import create_final_image, create_square_image
+from constants import base_dir, downloaded_dir, no_background_dir, final_dir, font_path, card_path, template_path, square_template_path
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Process images for promotions.')
 parser.add_argument('--skip-download', action='store_true', help='Skip downloading and processing images')
+parser.add_argument('--imagenes-cuadradas', action='store_true', help='Crear imágenes cuadradas en images/final/cuadradas')
 args = parser.parse_args()
 
 # Load the Excel file
@@ -45,7 +46,7 @@ for dir_path in [downloaded_dir, no_background_dir, final_dir]:
     os.makedirs(dir_path, exist_ok=True)
 
 # Clear directories before processing
-if not args.skip_download:
+if not args.skip_download and not args.imagenes_cuadradas:
     clear_directory(downloaded_dir)
     clear_directory(no_background_dir)
 clear_directory(final_dir)
@@ -62,41 +63,49 @@ if not args.skip_download:
         log_file.write("")
 
 # Download and process images if flag is not set
-if not args.skip_download:
+if not args.skip_download and not args.imagenes_cuadradas:
     print("Downloading and processing images...")
     for i, url in enumerate(tqdm(urls, desc="\033[94mDownloading images\033[0m", unit="image", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]')):
         if download_image(url, input_paths[i], error_log_path):
             remove_background(input_paths[i], output_paths[i], error_log_path)
 
-print("Creating final images...")
-for mode in ['light', 'dark']:
-    if mode == 'light':
-        card_paths = {
-            'with_prices': 'templates/light_card.png',
-            'without_prices': 'templates/light_card.png'
-        }
-        template_paths = {
-            'with_prices': 'templates/light_template.png',
-            'without_prices': 'templates/without_price_light_template.png'
-        }
-    else:
-        card_paths = {
-            'with_prices': 'templates/dark_card.png',
-            'without_prices': 'templates/dark_card.png'
-        }
-        template_paths = {
-            'with_prices': 'templates/dark_template.png',
-            'without_prices': 'templates/without_price_dark_template.png'
-        }
-    
-    for with_price_key, with_price_flag in [('with_prices', True), ('without_prices', False)]:
-        current_card_path = card_paths[with_price_key]
-        current_template_path = template_paths[with_price_key]
+if args.imagenes_cuadradas:
+    print("Creating square images...")
+    for i in tqdm(range(len(urls)), desc="\033[92mProcessing square images\033[0m", unit="image", ncols=100):
+        create_square_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, square_template_path)
+else:
+    print("Creating final images...")
+    for mode in ['light', 'dark']:
+        if mode == 'light':
+            card_paths = {
+                'with_prices': 'templates/light_card.png',
+                'without_prices': 'templates/light_card.png'
+            }
+            template_paths = {
+                'with_prices': 'templates/light_template.png',
+                'without_prices': 'templates/without_price_light_template.png'
+            }
+        else:
+            card_paths = {
+                'with_prices': 'templates/dark_card.png',
+                'without_prices': 'templates/dark_card.png'
+            }
+            template_paths = {
+                'with_prices': 'templates/dark_template.png',
+                'without_prices': 'templates/without_price_dark_template.png'
+            }
+        
+        for with_price_key, with_price_flag in [('with_prices', True), ('without_prices', False)]:
+            current_card_path = card_paths[with_price_key]
+            current_template_path = template_paths[with_price_key]
 
-        for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing {mode} images ({with_price_key})\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
-            create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode, with_price=with_price_flag)
+            for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing {mode} images ({with_price_key})\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
+                create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode, with_price=with_price_flag)
 
 # Open the final directory in the file explorer
-webbrowser.open('file://' + os.path.realpath(final_dir))
+if args.imagenes_cuadradas:
+    webbrowser.open('file://' + os.path.realpath(os.path.join(final_dir, "cuadradas")))
+else:
+    webbrowser.open('file://' + os.path.realpath(final_dir))
 
 print(f"All images processed and saved. You can view them in the following directory: {final_dir}")
