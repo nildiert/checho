@@ -223,7 +223,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
 
 def create_square_image(index, urls, prices, delivery_times, sizes, genders, types, dates, logos,
-                        input_paths, output_paths, final_dir, font_path, square_template_path):
+                        input_paths, output_paths, final_dir, font_path, square_template_path, custom_texts):
     # Cargar la plantilla cuadrada y escalarla a 737 px de ancho
     square_template = Image.open(square_template_path)
     final_width = 737
@@ -260,12 +260,11 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
 
     # Calcular el texto de validación (para el rectángulo naranja)
     today = datetime.today().strftime('%d/%m/%Y')
-    date_val = dates[index]
-    if pd.isnull(date_val):
+    custom_text = custom_texts[index]
+    if pd.isnull(custom_text):
         validity_text = ""
     else:
-        date_text = date_val.strftime('%d/%m/%Y')
-        validity_text = f"Precios válidos hasta {'hoy' if date_text == today else 'el'} {date_text}"
+        validity_text = custom_text
     
     padding = 10
     orange_x = 20

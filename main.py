@@ -29,6 +29,7 @@ genders = df['Genero'].fillna('hombre').tolist()  # Fill missing values with 'ho
 types = df['Tipo'].fillna('').tolist()  # Fill missing values with empty string
 dates = df['fecha'].apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
 logos = df['Logo'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
+custom_texts = df['Texto Personalizado'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
 
 # Ensure the lists are of the same length
 min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates), len(logos))
@@ -40,6 +41,7 @@ genders = genders[:min_length]
 types = types[:min_length]
 dates = dates[:min_length]
 logos = logos[:min_length]
+custom_texts = custom_texts[:min_length]
 
 # Create directories if they don't exist
 for dir_path in [downloaded_dir, no_background_dir, final_dir]:
@@ -72,7 +74,7 @@ if not args.skip_download and not args.imagenes_cuadradas:
 if args.imagenes_cuadradas:
     print("Creating square images...")
     for i in tqdm(range(len(urls)), desc="\033[92mProcessing square images\033[0m", unit="image", ncols=100):
-        create_square_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, square_template_path)
+        create_square_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, square_template_path, custom_texts)
 else:
     print("Creating final images...")
     for mode in ['light', 'dark']:
