@@ -248,10 +248,10 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     final_image.paste(resized_product, (product_x, product_y), resized_product)
 
     # Definir fuentes
-    font_rect = ImageFont.truetype(font_path, 24)
-    font_sizes_label = ImageFont.truetype(font_path, 20)
-    font_chip = ImageFont.truetype(font_path, 18)
-    font_price = ImageFont.truetype(font_path, 80)
+    font_rect         = ImageFont.truetype(font_path, 24)
+    font_sizes_label  = ImageFont.truetype(font_path, 20)
+    font_chip         = ImageFont.truetype(font_path, 18)
+    max_price_size    = 80  # tamaño máximo de fuente para el precio
 
     # Definir posición y dimensiones de los rectángulos
     rect_y = 415
@@ -265,7 +265,7 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
         validity_text = ""
     else:
         validity_text = custom_text
-    
+
     padding = 10
     orange_x = 20
     if validity_text:
@@ -290,20 +290,25 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
             return lines
         available_width = rect_width - 2 * padding
         lines = wrap_text(validity_text, font_rect, available_width)
-        line_heights = [draw.textbbox((0,0), line, font=font_rect)[3] - draw.textbbox((0,0), line, font=font_rect)[1] for line in lines]
+        line_heights = [
+            draw.textbbox((0,0), line, font=font_rect)[3] - draw.textbbox((0,0), line, font=font_rect)[1]
+            for line in lines
+        ]
         total_text_height = sum(line_heights) + (len(lines) - 1) * 2
         start_y = rect_y + (rect_height - total_text_height) // 2
         for line, lh in zip(lines, line_heights):
             draw.text((orange_x + padding, start_y), line, font=font_rect, fill="white")
             start_y += lh + 2
-    # Reservar el espacio del rectángulo naranja, aunque no haya texto
+
+    # Reservar espacio para chips
     sizes_y = rect_y + rect_height + 10
 
-    # Dibujar el rectángulo azul (siempre se dibuja)
+    # Dibujar el rectángulo azul
     blue_x = final_width - rect_width - 20
     rect_color_blue = "#4FAFFB"
     draw_rounded_rectangle(draw, (blue_x, rect_y, blue_x + rect_width, rect_y + rect_height), 5, rect_color_blue)
-    
+
+    # Texto de entrega
     if delivery_times[index] == "inmediata":
         delivery_text = "Entrega Inmediata."
     elif delivery_times[index] == "navidad":
@@ -314,8 +319,8 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     text_delivery_x = blue_x + (rect_width - (bbox_delivery[2] - bbox_delivery[0])) // 2
     text_delivery_y = rect_y + (rect_height - (bbox_delivery[3] - bbox_delivery[1])) // 2
     draw.text((text_delivery_x, text_delivery_y), delivery_text, font=font_rect, fill="white")
-    
-    # Dibujar el texto "Tallas disponibles" alineado a la izquierda dentro del área del rectángulo naranja
+
+    # Texto "Tallas disponibles"
     if types[index].lower() == 'dimensiones':
         sizes_label_text = "Dimensiones:"
         sizes_list = [sizes[index]]
@@ -325,27 +330,22 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     else:
         sizes_label_text = ""
         sizes_list = []
-    
+
     if sizes_label_text:
         text_sizes_x = orange_x + 10
         draw.text((text_sizes_x, sizes_y), sizes_label_text, font=font_sizes_label, fill="black")
         bbox_sizes = draw.textbbox((0,0), sizes_label_text, font=font_sizes_label)
-        height_sizes = bbox_sizes[3] - bbox_sizes[1]
-        sizes_y += height_sizes + 10
+        sizes_y += (bbox_sizes[3] - bbox_sizes[1]) + 10
 
-    # Dibujar los chips, envolviéndolos si exceden el ancho del rectángulo naranja
+    # Dibujar chips
     if sizes_list and types[index].lower() != 'dimensiones':
-        chip_size = 44
-        chip_gap_x = 9
-        chip_gap_y = 5
-        chip_x = orange_x
-        chip_y = sizes_y
+        chip_size, chip_gap_x, chip_gap_y = 44, 9, 5
+        chip_x, chip_y = orange_x, sizes_y
         for size in sizes_list:
             chip_text = str(int(size)) if isinstance(size, float) and size.is_integer() else str(size)
             chip_color = "#D2EBFF" if genders[index].lower() == 'hombre' else "#FFD2EB"
             if chip_x + chip_size > orange_x + rect_width:
-                chip_x = orange_x
-                chip_y += chip_size + chip_gap_y
+                chip_x, chip_y = orange_x, chip_y + chip_size + chip_gap_y
             draw_rounded_rectangle(draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, chip_color)
             bbox_chip = draw.textbbox((0,0), chip_text, font=font_chip)
             text_chip_x = chip_x + (chip_size - (bbox_chip[2] - bbox_chip[0])) // 2
@@ -353,33 +353,45 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
             draw.text((text_chip_x, text_chip_y), chip_text, font=font_chip, fill="black")
             chip_x += chip_size + chip_gap_x
 
+    # ———————— dibujar precio con ajuste dinámico ————————
     price_y_blue = rect_y + rect_height + 10
     price_text = f"${int(prices[index]):,}".replace(",", ".")
-    bbox_price = draw.textbbox((0,0), price_text, font=font_price)
-    text_price_x = blue_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
+
+    # 1. Fuente inicial al tamaño máximo
+    font_size = max_price_size
+    font_price = ImageFont.truetype(font_path, font_size)
+    bbox = draw.textbbox((0, 0), price_text, font=font_price)
+    text_width = bbox[2] - bbox[0]
+
+    # 2. Ajustar si excede el ancho del rectángulo azul
+    if text_width > rect_width:
+        scale = rect_width / text_width
+        font_size = int(font_size * scale)
+        font_size = max(font_size, 12)  # no bajar de 12 px
+        font_price = ImageFont.truetype(font_path, font_size)
+        bbox = draw.textbbox((0, 0), price_text, font=font_price)
+
+    # 3. Centrar y dibujar
+    text_price_x = blue_x + (rect_width - (bbox[2] - bbox[0])) // 2
     draw.text((text_price_x, price_y_blue), price_text, font=font_price, fill="#EE0701")
-    
-    # Agregar el logo en la parte superior izquierda usando el logo correspondiente a esta imagen (logos[index])
+
+    # Logo superior izquierdo (si aplica)
     if logos and index < len(logos) and logos[index].strip() and logos[index].lower() != 'nan':
         logo_name = f"{logos[index]}.png"
-        # Seleccionar carpeta de logos según se requiera (por ejemplo, para modo light)
-        if True:  # Puedes reemplazar con una condición si manejas modo en create_square_image
-            logo_folder = 'templates/logos/light'
-        else:
-            logo_folder = 'templates/logos/dark'
+        logo_folder = 'templates/logos/light'  # o condición según modo
         logo_path = os.path.join(logo_folder, logo_name)
         if os.path.exists(logo_path):
-            logo_image = Image.open(logo_path)
-            if logo_image.mode != 'RGBA':
-                logo_image = logo_image.convert('RGBA')
+            logo_image = Image.open(logo_path).convert("RGBA")
             logo_width = 120 if logos[index] == "gratis" else 90
             logo_ratio = logo_image.height / logo_image.width
             logo_height = int(logo_width * logo_ratio)
             logo_resized = logo_image.resize((logo_width, logo_height), Image.LANCZOS)
             final_image.paste(logo_resized, (39, 24), logo_resized)
 
+    # Guardar
     square_dir = os.path.join(final_dir, "cuadradas")
     os.makedirs(square_dir, exist_ok=True)
     final_image_name = os.path.join(square_dir, f"final_image_square_{index+1}.png")
     final_image.save(final_image_name)
     print(f"Square final image saved as {final_image_name}")
+
