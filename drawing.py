@@ -239,10 +239,24 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
         print(f"Image {output_paths[index]} not found, skipping.")
         return
 
+    # Escalar al ancho base de 500px
     new_width = 500
     product_ratio = product_image.width / product_image.height
     new_height = int(new_width / product_ratio)
     resized_product = product_image.resize((new_width, new_height), Image.LANCZOS)
+
+        # ————— Escalar proporcionalmente para width≤500px y height≤(rect_y–product_y) —————
+    orig_w, orig_h = product_image.size
+    max_w = 500
+    product_y = 100       # misma Y donde pegamos la imagen
+    rect_y = 415          # Y del tope del rectángulo azul
+    max_h = rect_y - product_y
+
+    scale = min(max_w / orig_w, max_h / orig_h)
+    new_width  = int(orig_w * scale)
+    new_height = int(orig_h * scale)
+    resized_product = product_image.resize((new_width, new_height), Image.LANCZOS)
+        
     product_x = (final_width - new_width) // 2
     product_y = 100
     final_image.paste(resized_product, (product_x, product_y), resized_product)
