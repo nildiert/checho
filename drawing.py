@@ -1,3 +1,5 @@
+# drawing.py
+
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import os
@@ -19,7 +21,7 @@ def parse_sizes(size_str, type_str):
         talla_order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
         sizes = size_str.split()
         return sorted(sizes, key=lambda x: talla_order.index(x) if x in talla_order else len(talla_order))
-    
+
     size_list = []
     for part in size_str.split():
         if '...' in part:
@@ -32,28 +34,22 @@ def parse_sizes(size_str, type_str):
             try:
                 size_list.append(float(part))
             except ValueError:
-                size_list.append(part)  # Handle non-numeric sizes
+                size_list.append(part)
     return sorted(set(size_list), key=lambda x: (isinstance(x, str), x))
 
-
 def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, card_path, template_path, mode, with_price=True):
-    # Set colors based on the mode
     if mode == 'light':
-        primary_color = "#EE0701"
-        background_color = "#FFFFFF"
         price_color = "#EE0701"
+        text_color = "black"
         rect_color_1 = "#FD5647"
         rect_color_2 = "#4FAFFB"
-        text_color = "black"
-        logo_folder = 'templates/logos/light'  # Select light logos
-    else:  # dark mode
-        primary_color = "#FF5733"
-        background_color = "#1E1E1E"
+        logo_folder = 'templates/logos/light'
+    else:
         price_color = "#FF5733"
+        text_color = "white"
         rect_color_1 = "#FF5733"
         rect_color_2 = "#3498DB"
-        text_color = "white"
-        logo_folder = 'templates/logos/dark'  # Select dark logos
+        logo_folder = 'templates/logos/dark'
 
     fonts = {
         "price": ImageFont.truetype(font_path, 48),
@@ -72,7 +68,6 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
     final_image = template_image.copy()
     draw = ImageDraw.Draw(final_image)
-
     price_y = 14
     price_x = 517
 
@@ -88,7 +83,6 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             print(f"Image {output_paths[index]} not found, skipping.")
             continue
 
-        # Resize and place the image
         new_width = 450
         new_height = int(new_width / image_ratio)
         resized_image = image.resize((new_width, new_height), Image.LANCZOS)
@@ -105,7 +99,6 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             box_width = 356
             box_x_offset = 19
             box_y_offset = card_height - 27 - 356
-
             image_x_offset = box_x_offset + (box_width - resized_image.width) // 2
             image_y_offset = box_y_offset + (356 - resized_image.height) // 2
         else:
@@ -114,9 +107,9 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
 
-        # Draw the price text only if with_price is True
-        price_text = f"${int(prices[index]):,}".replace(",", ".")
-        card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill=price_color)
+        if with_price and prices[index] is not None:
+            price_text = f"${int(prices[index]):,}".replace(",", ".")
+            card_draw.text((price_x, price_y), price_text, font=fonts["price"], fill=price_color)
 
         # Place the logo if available
         logo_name = f"{logos[index]}.png"
@@ -156,10 +149,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
             for size in sizes_list:
                 chip_text = str(int(size)) if isinstance(size, float) and size.is_integer() else str(size)
-                if mode == 'light':
-                    chip_color = "#D2EBFF" if genders[index].lower() == 'hombre' else "#FFD2EB"
-                else:
-                    chip_color = "#2C3E50" if genders[index].lower() == 'hombre' else "#8B2CFF"
+                chip_color = "#D2EBFF" if genders[index].lower() == 'hombre' else "#FFD2EB" if mode == 'light' else "#2C3E50" if genders[index].lower() == 'hombre' else "#8B2CFF"
 
                 draw_rounded_rectangle(card_draw, (chip_x, chip_y, chip_x + chip_size, chip_y + chip_size), 5, chip_color)
                 text_bbox = card_draw.textbbox((0, 0), chip_text, font=fonts["chip"])
@@ -179,11 +169,11 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         rect_x = card_width - 28 - rect_width
         rect1_y = card_height - 28 - rect_height
         if pd.isnull(dates[index]):
-            date_text  = None
+            date_text = None
         else:
             date_text = dates[index].strftime('%d/%m/%Y')
         rect1_text = f"Válido hasta {'hoy' if date_text == today else 'el'} {date_text}"
-        if not date_text == None:
+        if date_text is not None:
             draw_rounded_rectangle(card_draw, (rect_x, rect1_y, rect_x + rect_width, rect1_y + rect_height), corner_radius, rect_color_1)
             bbox_price = card_draw.textbbox((0, 0), rect1_text, font=fonts["rect"])
             text_x = rect_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
@@ -192,9 +182,9 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
         rect2_y = rect1_y - rect_height - 5
         if delivery_times[index] == "inmediata":
-            rect2_text = f"Entrega Inmediata."  
+            rect2_text = f"Entrega Inmediata."
         elif delivery_times[index] == "navidad":
-            rect2_text = f"Entrega antes de Navidad."  
+            rect2_text = f"Entrega antes de Navidad."
         else:
             rect2_text = f"Entrega en {int(delivery_times[index])} días aprox."
         draw_rounded_rectangle(card_draw, (rect_x, rect2_y, rect_x + rect_width, rect2_y + rect_height), corner_radius, rect_color_2)
@@ -207,7 +197,6 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
         card_y_position = 50 + j * (card_height + 20)
         final_image.paste(card_with_image, (card_x_position, card_y_position), card_with_image)
 
-    # Agregar el ícono en la parte superior izquierda, separado 39 px de la izquierda y 24 px del borde superior
     icon_path = "templates/icon.png"
     if os.path.exists(icon_path):
         icon_image = Image.open(icon_path)
@@ -224,7 +213,41 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
 
 def create_square_image(index, urls, prices, delivery_times, sizes, genders, types, dates, logos,
                         input_paths, output_paths, final_dir, font_path, square_template_path, custom_texts):
-    # Cargar la plantilla cuadrada y escalarla a 737 px de ancho
+    from PIL import Image, ImageDraw, ImageFont
+    from datetime import datetime
+    import os
+    import pandas as pd
+
+    def draw_rounded_rectangle(draw, xy, radius, fill):
+        x0, y0, x1, y1 = xy
+        draw.rectangle([x0 + radius, y0, x1 - radius, y1], fill=fill)
+        draw.rectangle([x0, y0 + radius, x1, y1 - radius], fill=fill)
+        draw.pieslice([x0, y0, x0 + 2*radius, y0 + 2*radius], 180, 270, fill=fill)
+        draw.pieslice([x1 - 2*radius, y0, x1, y0 + 2*radius], 270, 360, fill=fill)
+        draw.pieslice([x0, y1 - 2*radius, x0 + 2*radius, y1], 90, 180, fill=fill)
+        draw.pieslice([x1 - 2*radius, y1 - 2*radius, x1, y1], 0, 90, fill=fill)
+
+    def parse_sizes(size_str, type_str):
+        if type_str.lower() == 'talla':
+            talla_order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
+            sizes = size_str.split()
+            return sorted(sizes, key=lambda x: talla_order.index(x) if x in talla_order else len(talla_order))
+
+        size_list = []
+        for part in size_str.split():
+            if '...' in part:
+                start, end = map(float, part.split('...'))
+                size_list.extend([start + 0.5 * i for i in range(int((end - start) * 2) + 1)])
+            elif '..' in part:
+                start, end = map(float, part.split('..'))
+                size_list.extend(range(int(start), int(end) + 1))
+            else:
+                try:
+                    size_list.append(float(part))
+                except ValueError:
+                    size_list.append(part)
+        return sorted(set(size_list), key=lambda x: (isinstance(x, str), x))
+
     square_template = Image.open(square_template_path)
     final_width = 737
     template_ratio = square_template.height / square_template.width
@@ -232,59 +255,41 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     final_image = square_template.resize((final_width, new_template_height), Image.LANCZOS)
     draw = ImageDraw.Draw(final_image)
 
-    # Cargar la imagen procesada del producto
     try:
         product_image = Image.open(output_paths[index])
     except FileNotFoundError:
         print(f"Image {output_paths[index]} not found, skipping.")
         return
 
-    # Escalar al ancho base de 500px
-    new_width = 500
-    product_ratio = product_image.width / product_image.height
-    new_height = int(new_width / product_ratio)
-    resized_product = product_image.resize((new_width, new_height), Image.LANCZOS)
-
-        # ————— Escalar proporcionalmente para width≤500px y height≤(rect_y–product_y) —————
     orig_w, orig_h = product_image.size
     max_w = 500
-    product_y = 100       # misma Y donde pegamos la imagen
-    rect_y = 415          # Y del tope del rectángulo azul
+    product_y = 100
+    rect_y = 415
     max_h = rect_y - product_y
-
     scale = min(max_w / orig_w, max_h / orig_h)
     new_width  = int(orig_w * scale)
     new_height = int(orig_h * scale)
     resized_product = product_image.resize((new_width, new_height), Image.LANCZOS)
-        
+
     product_x = (final_width - new_width) // 2
-    product_y = 100
     final_image.paste(resized_product, (product_x, product_y), resized_product)
 
-    # Definir fuentes
     font_rect = ImageFont.truetype(font_path, 24)
     font_sizes_label = ImageFont.truetype(font_path, 20)
     font_chip = ImageFont.truetype(font_path, 18)
     font_price = ImageFont.truetype(font_path, 80)
 
-    # Definir posición y dimensiones de los rectángulos
-    rect_y = 415
     rect_width = 340
     rect_height = 69
-
-    # Calcular el texto de validación (para el rectángulo naranja)
-    today = datetime.today().strftime('%d/%m/%Y')
-    custom_text = custom_texts[index]
-    if pd.isnull(custom_text):
-        validity_text = ""
-    else:
-        validity_text = custom_text
-    
     padding = 10
     orange_x = 20
-    if validity_text:
+    blue_x = final_width - rect_width - 20
+
+    custom_text = custom_texts[index]
+    if pd.notnull(custom_text):
         rect_color_orange = "#FD5647"
         draw_rounded_rectangle(draw, (orange_x, rect_y, orange_x + rect_width, rect_y + rect_height), 5, rect_color_orange)
+
         def wrap_text(text, font, max_width):
             words = text.split()
             lines = []
@@ -292,8 +297,7 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
             for word in words:
                 test_line = current_line + (" " if current_line else "") + word
                 bbox = draw.textbbox((0,0), test_line, font=font)
-                text_width = bbox[2] - bbox[0]
-                if text_width <= max_width:
+                if (bbox[2] - bbox[0]) <= max_width:
                     current_line = test_line
                 else:
                     if current_line:
@@ -302,22 +306,20 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
             if current_line:
                 lines.append(current_line)
             return lines
+
         available_width = rect_width - 2 * padding
-        lines = wrap_text(validity_text, font_rect, available_width)
+        lines = wrap_text(custom_text, font_rect, available_width)
         line_heights = [draw.textbbox((0,0), line, font=font_rect)[3] - draw.textbbox((0,0), line, font=font_rect)[1] for line in lines]
         total_text_height = sum(line_heights) + (len(lines) - 1) * 2
         start_y = rect_y + (rect_height - total_text_height) // 2
         for line, lh in zip(lines, line_heights):
             draw.text((orange_x + padding, start_y), line, font=font_rect, fill="white")
             start_y += lh + 2
-    # Reservar el espacio del rectángulo naranja, aunque no haya texto
+
     sizes_y = rect_y + rect_height + 10
 
-    # Dibujar el rectángulo azul (siempre se dibuja)
-    blue_x = final_width - rect_width - 20
     rect_color_blue = "#4FAFFB"
     draw_rounded_rectangle(draw, (blue_x, rect_y, blue_x + rect_width, rect_y + rect_height), 5, rect_color_blue)
-    
     if delivery_times[index] == "inmediata":
         delivery_text = "Entrega Inmediata."
     elif delivery_times[index] == "navidad":
@@ -328,8 +330,7 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     text_delivery_x = blue_x + (rect_width - (bbox_delivery[2] - bbox_delivery[0])) // 2
     text_delivery_y = rect_y + (rect_height - (bbox_delivery[3] - bbox_delivery[1])) // 2
     draw.text((text_delivery_x, text_delivery_y), delivery_text, font=font_rect, fill="white")
-    
-    # Dibujar el texto "Tallas disponibles" alineado a la izquierda dentro del área del rectángulo naranja
+
     if types[index].lower() == 'dimensiones':
         sizes_label_text = "Dimensiones:"
         sizes_list = [sizes[index]]
@@ -339,15 +340,13 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     else:
         sizes_label_text = ""
         sizes_list = []
-    
+
     if sizes_label_text:
         text_sizes_x = orange_x + 10
         draw.text((text_sizes_x, sizes_y), sizes_label_text, font=font_sizes_label, fill="black")
         bbox_sizes = draw.textbbox((0,0), sizes_label_text, font=font_sizes_label)
-        height_sizes = bbox_sizes[3] - bbox_sizes[1]
-        sizes_y += height_sizes + 10
+        sizes_y += (bbox_sizes[3] - bbox_sizes[1]) + 10
 
-    # Dibujar los chips, envolviéndolos si exceden el ancho del rectángulo naranja
     if sizes_list and types[index].lower() != 'dimensiones':
         chip_size = 44
         chip_gap_x = 9
@@ -368,19 +367,15 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
             chip_x += chip_size + chip_gap_x
 
     price_y_blue = rect_y + rect_height + 10
-    price_text = f"${int(prices[index]):,}".replace(",", ".")
-    bbox_price = draw.textbbox((0,0), price_text, font=font_price)
-    text_price_x = blue_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
-    draw.text((text_price_x, price_y_blue), price_text, font=font_price, fill="#EE0701")
-    
-    # Agregar el logo en la parte superior izquierda usando el logo correspondiente a esta imagen (logos[index])
+    if pd.notnull(prices[index]):
+        price_text = f"${int(prices[index]):,}".replace(",", ".")
+        bbox_price = draw.textbbox((0,0), price_text, font=font_price)
+        text_price_x = blue_x + (rect_width - (bbox_price[2] - bbox_price[0])) // 2
+        draw.text((text_price_x, price_y_blue), price_text, font=font_price, fill="#EE0701")
+
     if logos and index < len(logos) and logos[index].strip() and logos[index].lower() != 'nan':
         logo_name = f"{logos[index]}.png"
-        # Seleccionar carpeta de logos según se requiera (por ejemplo, para modo light)
-        if True:  # Puedes reemplazar con una condición si manejas modo en create_square_image
-            logo_folder = 'templates/logos/light'
-        else:
-            logo_folder = 'templates/logos/dark'
+        logo_folder = 'templates/logos/light'
         logo_path = os.path.join(logo_folder, logo_name)
         if os.path.exists(logo_path):
             logo_image = Image.open(logo_path)

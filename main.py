@@ -1,3 +1,5 @@
+# main.py
+
 import pandas as pd
 import os
 import argparse
@@ -22,17 +24,18 @@ df = pd.read_excel(file_path, header=0)
 
 # Extract the relevant columns
 urls = df['Link Foto'].dropna().tolist()
-prices = df['Precio de venta'].dropna().astype(float).tolist()
+prices_raw = df['Precio de venta'].tolist()
+prices = [float(p) if pd.notnull(p) else None for p in prices_raw]
 delivery_times = df['TIEMPO DE ENTREGA'].dropna().tolist()
-sizes = df['Talla'].astype(str).tolist()  # Convert to string
-genders = df['Genero'].fillna('hombre').tolist()  # Fill missing values with 'hombre'
-types = df['Tipo'].fillna('').tolist()  # Fill missing values with empty string
+sizes = df['Talla'].astype(str).tolist()
+genders = df['Genero'].fillna('hombre').tolist()
+types = df['Tipo'].fillna('').tolist()
 dates = df['fecha'].apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
-logos = df['Logo'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
-custom_texts = df['Texto Personalizado'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
+logos = df['Logo'].fillna('').tolist()
+custom_texts = df['Texto Personalizado'].fillna('').tolist()
 
-# Ensure the lists are of the same length
-min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates), len(logos))
+# Asegurarse de usar la longitud de URLs para cortar las listas (evita errores con precios nulos)
+min_length = len(urls)
 urls = urls[:min_length]
 prices = prices[:min_length]
 delivery_times = delivery_times[:min_length]
@@ -60,7 +63,6 @@ output_paths = [os.path.join(no_background_dir, f"image_no_bg_{i}.png") for i in
 # Path for error log
 error_log_path = os.path.join(base_dir, 'error_log.txt')
 if not args.skip_download:
-    # Clear the error log file
     with open(error_log_path, "w") as log_file:
         log_file.write("")
 
@@ -96,13 +98,18 @@ else:
                 'with_prices': 'templates/dark_template.png',
                 'without_prices': 'templates/without_price_dark_template.png'
             }
-        
+
         for with_price_key, with_price_flag in [('with_prices', True), ('without_prices', False)]:
             current_card_path = card_paths[with_price_key]
             current_template_path = template_paths[with_price_key]
 
             for i in tqdm(range(0, len(urls), 3), desc=f"\033[92mProcessing {mode} images ({with_price_key})\033[0m", unit="batch", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]'):
-                create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode, with_price=with_price_flag)
+                if with_price_flag and any(prices[i + j] is None for j in range(3) if i + j < len(prices)):
+                    continue  # Saltar si se requiere precio pero alguno de los 3 no lo tiene
+                if with_price_flag:
+                    create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode, with_price=True)
+                else:
+                    create_final_image(i, urls, prices, delivery_times, sizes, genders, types, dates, logos, input_paths, output_paths, final_dir, font_path, current_card_path, current_template_path, mode, with_price=False)
 
 # Open the final directory in the file explorer
 if args.imagenes_cuadradas:
