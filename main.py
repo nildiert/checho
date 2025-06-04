@@ -4,6 +4,7 @@ import argparse
 from tqdm import tqdm
 import webbrowser
 from datetime import datetime
+import shutil
 
 from utils import clear_directory, download_image
 from image_processing import remove_background
@@ -69,8 +70,12 @@ if not args.skip_download and not args.imagenes_cuadradas:
     print("Downloading and processing images...")
     for i, url in enumerate(tqdm(urls, desc="\033[94mDownloading images\033[0m", unit="image", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]')):
         if download_image(url, input_paths[i], error_log_path):
-            remove_background(input_paths[i], output_paths[i], error_log_path)
-
+            if custom_texts[i].strip().lower() == "si":
+                # Copiar la imagen tal cual sin quitar fondo
+                shutil.copy(input_paths[i], output_paths[i])
+            else:
+                remove_background(input_paths[i], output_paths[i], error_log_path)      
+                    
 if args.imagenes_cuadradas:
     print("Creating square images...")
     for i in tqdm(range(len(urls)), desc="\033[92mProcessing square images\033[0m", unit="image", ncols=100):

@@ -112,7 +112,10 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             image_x_offset = 60
             image_y_offset = card_height - 70 - resized_image.height
 
-        card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
+        if resized_image.mode == "RGBA":
+            card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
+        else:
+            card_with_image.paste(resized_image, (image_x_offset, image_y_offset))
 
         # Draw the price text only if with_price is True
         price_text = f"${int(prices[index]):,}".replace(",", ".")
