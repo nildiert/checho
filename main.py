@@ -30,7 +30,7 @@ genders = df['Genero'].fillna('hombre').tolist()  # Fill missing values with 'ho
 types = df['Tipo'].fillna('').tolist()  # Fill missing values with empty string
 dates = df['fecha'].apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
 logos = df['Logo'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
-custom_texts = df['Texto Personalizado'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
+custom_texts = df['Full image'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
 
 # Ensure the lists are of the same length
 min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates), len(logos))
