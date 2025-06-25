@@ -4,6 +4,7 @@ import argparse
 from tqdm import tqdm
 import webbrowser
 from datetime import datetime
+import shutil
 
 from utils import clear_directory, download_image
 from image_processing import remove_background
@@ -29,7 +30,9 @@ genders = df['Genero'].fillna('hombre').tolist()  # Fill missing values with 'ho
 types = df['Tipo'].fillna('').tolist()  # Fill missing values with empty string
 dates = df['fecha'].apply(lambda date: pd.to_datetime(date, format='%d/%m/%Y', dayfirst=True, errors='coerce')).tolist()
 logos = df['Logo'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
-custom_texts = df['Texto Personalizado'].fillna('').tolist()  # Extract logos column and fill missing values with an empty string
+custom_texts = df['Texto personalizado'].fillna('').tolist()
+full_image_flags = df['Full image'].fillna('').astype(str).str.strip().str.lower().tolist()
+# Extract logos column and fill missing values with an empty string
 
 # Ensure the lists are of the same length
 min_length = min(len(urls), len(prices), len(delivery_times), len(sizes), len(genders), len(types), len(dates), len(logos))
@@ -69,8 +72,13 @@ if not args.skip_download and not args.imagenes_cuadradas:
     print("Downloading and processing images...")
     for i, url in enumerate(tqdm(urls, desc="\033[94mDownloading images\033[0m", unit="image", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [elapsed: {elapsed} left: {remaining}]')):
         if download_image(url, input_paths[i], error_log_path):
-            remove_background(input_paths[i], output_paths[i], error_log_path)
-
+            if full_image_flags[i] == "si":
+                print(f"✅ Imagen {i} marcada como FULL IMAGE. No se elimina fondo.")
+                shutil.copy(input_paths[i], output_paths[i])
+            else:
+                remove_background(input_paths[i], output_paths[i], error_log_path)
+      
+                    
 if args.imagenes_cuadradas:
     print("Creating square images...")
     for i in tqdm(range(len(urls)), desc="\033[92mProcessing square images\033[0m", unit="image", ncols=100):
