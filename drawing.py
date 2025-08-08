@@ -89,7 +89,7 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             continue
 
         # Resize and place the image
-        new_width = 450
+        new_width = 430
         new_height = int(new_width / image_ratio)
         resized_image = image.resize((new_width, new_height), Image.LANCZOS)
 
@@ -109,13 +109,13 @@ def create_final_image(i, urls, prices, delivery_times, sizes, genders, types, d
             image_x_offset = box_x_offset + (box_width - resized_image.width) // 2
             image_y_offset = box_y_offset + (356 - resized_image.height) // 2
         else:
-            image_x_offset = 60
-            image_y_offset = card_height - 70 - resized_image.height
+            image_x_offset = 30
+            image_y_offset = card_height - 40 - resized_image.height
 
-        if resized_image.mode == "RGBA":
-            card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
-        else:
-            card_with_image.paste(resized_image, (image_x_offset, image_y_offset))
+        if resized_image.mode != "RGBA":
+            resized_image = resized_image.convert("RGBA")
+
+        card_with_image.paste(resized_image, (image_x_offset, image_y_offset), resized_image)
 
         # Draw the price text only if with_price is True
         price_text = f"${int(prices[index]):,}".replace(",", ".")
