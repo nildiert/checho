@@ -1,7 +1,16 @@
 import sys
 import subprocess
-import customtkinter as ctk
-from tkinter import filedialog
+try:
+    import customtkinter as ctk
+    from tkinter import filedialog
+except ModuleNotFoundError:
+    print(
+        "No se encontró el módulo tkinter requerido para la interfaz gráfica.\n"
+        "Instala las dependencias de Tk con uno de los siguientes comandos:\n"
+        "  macOS: brew install python-tk\n"
+        "  Ubuntu/WSL: sudo apt-get install python3-tk"
+    )
+    sys.exit(1)
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")

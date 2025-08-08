@@ -7,12 +7,15 @@ def install_venv():
     # Actualiza los repositorios de paquetes
     subprocess.run(['sudo', 'apt', 'update'], check=True)
     
-    # Instala python3.10-venv directamente
+    # Instala python3.10-venv y el soporte de Tkinter
     try:
-        print("Instalando python3.10-venv...")
-        subprocess.run(['sudo', 'apt', 'install', '-y', 'python3.10-venv'], check=True)
+        print("Instalando python3.10-venv y python3.10-tk...")
+        subprocess.run(
+            ['sudo', 'apt', 'install', '-y', 'python3.10-venv', 'python3.10-tk'],
+            check=True,
+        )
     except subprocess.CalledProcessError:
-        print("Error: No se pudo instalar python3.10-venv.")
+        print("Error: No se pudo instalar python3.10-venv o python3.10-tk.")
         sys.exit(1)
 
     # Verifica si ensurepip está disponible
