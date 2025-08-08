@@ -9,10 +9,12 @@ This project processes promotional images. A small GUI built with [CustomTkinter
    pip install -r requirements.txt
    ```
 2. Ensure Tkinter support is available:
-   - **macOS**:
+   - **macOS**: install the `python-tk` formula that matches your Python version.
+     Check your version with `python3 --version` and then run, for example:
      ```bash
-     brew install python-tk
+     brew install python-tk@3.12
      ```
+     Make sure to execute the GUI with the same interpreter, e.g. `python3.12 gui.py`.
    - **Ubuntu / WSL**:
      ```bash
      sudo apt-get install python3-tk
@@ -22,6 +24,6 @@ This project processes promotional images. A small GUI built with [CustomTkinter
 
 Run the GUI:
 ```bash
-python gui.py
+python3 gui.py
 ```
 The interface provides a button to select the Excel file and checkboxes for "Omitir descarga" and "Imágenes cuadradas".

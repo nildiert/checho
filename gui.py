@@ -7,8 +7,9 @@ except ModuleNotFoundError:
     print(
         "No se encontró el módulo tkinter requerido para la interfaz gráfica.\n"
         "Instala las dependencias de Tk con uno de los siguientes comandos:\n"
-        "  macOS: brew install python-tk\n"
-        "  Ubuntu/WSL: sudo apt-get install python3-tk"
+        "  macOS: brew install python-tk@<versión>  # usa la misma versión que tu Python, por ejemplo 3.12\n"
+        "  Ubuntu/WSL: sudo apt-get install python3-tk\n"
+        "Tras instalarlo, ejecuta gui.py con la misma versión de Python\n"
     )
     sys.exit(1)
 
