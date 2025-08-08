@@ -15,10 +15,12 @@ from constants import base_dir, downloaded_dir, no_background_dir, final_dir, fo
 parser = argparse.ArgumentParser(description='Process images for promotions.')
 parser.add_argument('--skip-download', action='store_true', help='Skip downloading and processing images')
 parser.add_argument('--imagenes-cuadradas', action='store_true', help='Crear imágenes cuadradas en images/final/cuadradas')
+parser.add_argument('--excel-file', type=str, default='Promos Fotos Datos.xlsx',
+                    help='Ruta del archivo de Excel con los datos de las promociones')
 args = parser.parse_args()
 
 # Load the Excel file
-file_path = 'Promos Fotos Datos.xlsx'
+file_path = args.excel_file
 df = pd.read_excel(file_path, header=0)
 
 # Extract the relevant columns
