@@ -259,9 +259,11 @@ def create_square_image(index, urls, prices, delivery_times, sizes, genders, typ
     new_width  = int(orig_w * scale)
     new_height = int(orig_h * scale)
     resized_product = product_image.resize((new_width, new_height), Image.LANCZOS)
-        
+
     product_x = (final_width - new_width) // 2
     product_y = 100
+    if resized_product.mode != "RGBA":
+        resized_product = resized_product.convert("RGBA")
     final_image.paste(resized_product, (product_x, product_y), resized_product)
 
     # Definir fuentes
